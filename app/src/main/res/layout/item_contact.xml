@@ -15,6 +15,15 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <ImageView
+        android:id="@+id/popup_menu_iv"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_more"
+        app:layout_constraintTop_toBottomOf="@id/last_msg_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
     <TextView
         android:id="@+id/name_tv"
         android:layout_width="wrap_content"
@@ -31,9 +40,10 @@
         android:id="@+id/last_msg_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="@string/app_name"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@id/name_tv"
-        app:layout_constraintTop_toBottomOf="@id/name_tv"/>
+        app:layout_constraintTop_toBottomOf="@id/name_tv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

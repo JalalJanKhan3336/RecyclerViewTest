@@ -1,13 +1,17 @@
 package com.pakistan.recyclerviewtest;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -17,11 +21,14 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.MyViewHo
     private Context mContext;
     private List<Contact> mContactList;
     private RecyclerViewItemClickListener mRecyclerViewItemClickListener;
+    private RecyclerViewItemActionListener mRecyclerViewItemActionListener;
 
-    public ContactAdapter(Context mContext, List<Contact> mContactList, RecyclerViewItemClickListener listener) {
+    public ContactAdapter(Context mContext, List<Contact> mContactList, RecyclerViewItemClickListener mRecyclerViewItemClickListener,
+                          RecyclerViewItemActionListener mRecyclerViewItemActionListener) {
         this.mContext = mContext;
         this.mContactList = mContactList;
-        mRecyclerViewItemClickListener = listener;
+        this.mRecyclerViewItemClickListener = mRecyclerViewItemClickListener;
+        this.mRecyclerViewItemActionListener = mRecyclerViewItemActionListener;
     }
 
     @NonNull
@@ -34,7 +41,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.MyViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
         final Contact obj = mContactList.get(position);
 
         holder.imageView.setImageResource(obj.getImage());
@@ -47,6 +54,42 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.MyViewHo
                 mRecyclerViewItemClickListener.onItemSingleClicked(obj, position);
             }
         });
+
+        holder.popupMenu_IV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu menu = new PopupMenu(mContext,holder.popupMenu_IV);
+                menu.getMenuInflater().inflate(R.menu.item_popup_menu,menu.getMenu());
+                menu.show();
+
+                menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        boolean isClicked = false;
+
+                        switch (item.getItemId()){
+                            case R.id.action_delete:{
+                                isClicked = true;
+                                Log.d("ContactAdapter", "Deleted_Item_At_Position: "+position);
+                                mRecyclerViewItemActionListener.onActionDeleteClicked(obj,position);
+                                break;
+                            }
+                            case R.id.action_archive:{
+                                isClicked = true;
+                                Log.d("ContactAdapter", "Archived_Item_At_Position: "+position);
+                                mRecyclerViewItemActionListener.onActionArchiveClicked(obj,position);
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+
+                        return isClicked;
+                    }
+                });
+
+            }
+        });
     }
 
     @Override
@@ -56,13 +99,14 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.MyViewHo
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView imageView;
+        private ImageView imageView, popupMenu_IV;
         private TextView nameTV, lastMessageTV;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imageView = itemView.findViewById(R.id.image_iv);
+            popupMenu_IV = itemView.findViewById(R.id.popup_menu_iv);
             nameTV = itemView.findViewById(R.id.name_tv);
             lastMessageTV = itemView.findViewById(R.id.last_msg_tv);
         }
