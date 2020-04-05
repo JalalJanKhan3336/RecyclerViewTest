@@ -1,18 +1,28 @@
 package com.pakistan.recyclerviewtest;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+
+import net.alhazmy13.mediapicker.Image.ImagePicker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +33,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
     private ContactAdapter adapter;
     private List<Contact> contactList = new ArrayList<>();
     private Contact mSwipedItem;
+    private ImageView imageView;
+    private FloatingActionButton mAdd_FAB;
+
+    // Buttons
+    private Button gamesButton, appsButton;
+
+    private AppsFragment appsFragment;
+    private GamesFragment gamesFragment;
 
     private ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
         @Override
@@ -49,8 +67,71 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        recyclerView = findViewById(R.id.recyclerview);
-        populateList();
+        appsFragment = new AppsFragment();
+        gamesFragment = new GamesFragment();
+
+        gamesButton = findViewById(R.id.games_fragment_btn);
+        appsButton = findViewById(R.id.apps_fragment_btn);
+
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.add(R.id.fragments_container,gamesFragment,gamesFragment.getTag());
+        ft.commit();
+
+        gamesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Load Games Fragment
+
+                FragmentManager fm = getSupportFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.replace(R.id.fragments_container,gamesFragment,gamesFragment.getTag());
+                ft.commit();
+            }
+        });
+
+        appsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Load Apps Fragment
+                FragmentManager fm = getSupportFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.replace(R.id.fragments_container,appsFragment, appsFragment.getTag());
+                ft.commit();
+            }
+        });
+
+        //imageView = findViewById(R.id.my_image);
+        //mAdd_FAB = findViewById(R.id.add_fab);
+
+        // Load picked image
+        //Glide.with(this).load(R.drawable.dummy_gif).into(imageView);
+
+        // Click on Add_FAB
+        /*mAdd_FAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                browseImage();
+            }
+        });
+*/
+        //recyclerView = findViewById(R.id.recyclerview);
+        //populateList();
+    }
+
+    // Either Capture image via camera or Pick image from Gallery
+    private void browseImage() {
+        ImagePicker.Builder builder = new ImagePicker.Builder(this);
+
+        builder.allowMultipleImages(false);
+        builder.allowOnlineImages(false);
+        builder.compressLevel(ImagePicker.ComperesLevel.MEDIUM);
+        builder.scale(500,500);
+        builder.directory(ImagePicker.Directory.DEFAULT);
+        builder.extension(ImagePicker.Extension.PNG);
+        builder.mode(ImagePicker.Mode.CAMERA_AND_GALLERY);
+
+        builder.build();
     }
 
     private void populateList() {
@@ -151,4 +232,23 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == RESULT_OK && data != null){
+            if(requestCode == ImagePicker.IMAGE_PICKER_REQUEST_CODE){
+                List<String> paths = data.getStringArrayListExtra(ImagePicker.EXTRA_IMAGE_PATH);
+
+                if(paths != null){
+                    String imagePath = paths.get(0);
+
+                    // Load picked image
+                    Glide.with(this).load(imagePath).into(imageView);
+                }
+
+            }
+        }
+
+    }
 }
